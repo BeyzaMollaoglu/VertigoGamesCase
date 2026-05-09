@@ -131,7 +131,7 @@ SpriteAtlas:
   - ui_card_panel_zone_white
   - UI_Icon_Renders_tier3_smg
   - ui_icon_render_t_cons_molotov
-  - UI_icon_chest_small_noligt
+  - UI_icon_chest_small_nolight
   - UI_Icons_SMG_Points
   - ui_vfx_offer_shine
   - ui_icon_mle_bayonet_summer_vice

@@ -12,6 +12,12 @@ public class SpinManager : MonoBehaviour
     public List<RewardData> rewardPool;
     public RewardData deathData;
 
+    [Header("Indicator Graphics")]
+    public Image ui_image_indicator;
+    public Sprite bronzeIndicatorSprite;
+    public Sprite silverIndicatorSprite;
+    public Sprite goldIndicatorSprite;
+
     [Header("Spin Graphics")]
     public Image ui_image_spin_main;
     public Sprite bronzeSpinSprite;
@@ -36,9 +42,27 @@ public class SpinManager : MonoBehaviour
         SpinType currentRarity;
         int multiplier = 1;
 
-        if (currentZone % 30 == 0) { currentRarity = SpinType.Gold; multiplier = 10; ui_image_spin_main.sprite = goldSpinSprite; }
-        else if (currentZone % 5 == 0) { currentRarity = SpinType.Silver; multiplier = 5; ui_image_spin_main.sprite = silverSpinSprite; }
-        else { currentRarity = SpinType.Bronze; multiplier = 1; ui_image_spin_main.sprite = bronzeSpinSprite; }
+        if (currentZone % 30 == 0)
+        {
+            currentRarity = SpinType.Gold;
+            multiplier = 10;
+            ui_image_spin_main.sprite = goldSpinSprite;
+            ui_image_indicator.sprite = goldIndicatorSprite;
+        }
+        else if (currentZone % 5 == 0)
+        {
+            currentRarity = SpinType.Silver;
+            multiplier = 5;
+            ui_image_spin_main.sprite = silverSpinSprite;
+            ui_image_indicator.sprite = silverIndicatorSprite;
+        }
+        else
+        {
+            currentRarity = SpinType.Bronze;
+            multiplier = 1;
+            ui_image_spin_main.sprite = bronzeSpinSprite;
+            ui_image_indicator.sprite = bronzeIndicatorSprite;
+        }
 
         ui_text_zone_number_value.text = currentZone.ToString();
 

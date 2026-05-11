@@ -40,7 +40,6 @@ public class ZoneStripManager : MonoBehaviour
             rt.anchoredPosition3D = new Vector3(posX, 0, 0);
             rt.localScale = Vector3.one;
 
-            // Yazı Ayarları ve Renklendirme Mantığı
             TextMeshProUGUI textComp = newZone.GetComponentInChildren<TextMeshProUGUI>(true);
             if (textComp != null)
             {
@@ -48,15 +47,12 @@ public class ZoneStripManager : MonoBehaviour
                 textComp.enabled = true;
                 textComp.text = i.ToString();
 
-                // Varsayılan renk beyaz
                 textComp.color = Color.white;
 
-                // 30'un katları sarı (öncelikli)
                 if (i % 30 == 0)
                 {
                     textComp.color = Color.yellow;
                 }
-                // 5 veya 10'un katları yeşil
                 else if (i % 5 == 0 || i % 10 == 0)
                 {
                     textComp.color = Color.green;

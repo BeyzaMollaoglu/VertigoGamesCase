@@ -29,6 +29,8 @@ public class SpinManager : MonoBehaviour
 
     private bool isSpinning = false;
 
+    public RewardPopupManager rewardPopupManager;
+
     private void Start()
     {
         if (zoneStripManager != null)
@@ -46,16 +48,24 @@ public class SpinManager : MonoBehaviour
         int randomSlotIndex = Random.Range(0, 8);
         float targetAngle = (360f * 5f) + (randomSlotIndex * 45f);
 
-        ui_image_spin_main.transform.DORotate(new Vector3(0, 0, -targetAngle), 3f, RotateMode.FastBeyond360)
+        ui_image_spin_main.transform.DORotate(new Vector3(0, 0, targetAngle), 3f, RotateMode.FastBeyond360)
             .SetEase(Ease.OutQuart)
             .OnComplete(() =>
             {
                 isSpinning = false;
+
+                SpinSlot winningSlot = ui_spin_slots[randomSlotIndex];
+                RewardData wonData = winningSlot.GetCurrentData();
+
+                if (rewardPopupManager != null && wonData != null)
+                {
+                    int multiplier = (currentZone % 30 == 0) ? 10 : (currentZone % 5 == 0 ? 5 : 1);
+
+                    rewardPopupManager.ShowReward(wonData.rewardIcon, wonData.isDeath ? "DEATH" : "x" + (wonData.baseAmount * multiplier));
+                }
+
                 currentZone++;
-
-                if (zoneStripManager != null)
-                    zoneStripManager.UpdateStripPosition(currentZone);
-
+                if (zoneStripManager != null) zoneStripManager.UpdateStripPosition(currentZone);
                 SetupSpinWheel();
             });
     }

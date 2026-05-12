@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using TMPro;
+using System.Collections.Generic;
 
 public class RewardPopupManager : MonoBehaviour
 {
@@ -22,10 +23,10 @@ public class RewardPopupManager : MonoBehaviour
     [Header("Left Panel Settings")]
     public Transform leftPanelContent;
     public GameObject rewardItemPrefab;
+
     private Sprite _lastEarnedSprite;
     private string _lastAmount;
-
-    public CollectedItem collectedItem;
+    private Dictionary<string, CollectedItem> _activeRewards = new Dictionary<string, CollectedItem>();
 
     private void Start()
     {
@@ -40,7 +41,6 @@ public class RewardPopupManager : MonoBehaviour
 
         rewardIcon.rectTransform.rotation = Quaternion.Euler(0, 0, 0);
         rewardIcon.preserveAspect = true;
-
         rewardIcon.sprite = icon;
         rewardAmountText.text = amount;
 
@@ -57,35 +57,77 @@ public class RewardPopupManager : MonoBehaviour
     {
         if (_lastEarnedSprite == null) return;
 
+        popupPanel.SetActive(false);
+
+        if (_activeRewards.ContainsKey(_lastEarnedSprite.name))
+        {
+            UpdateExistingReward(_activeRewards[_lastEarnedSprite.name]);
+        }
+        else
+        {
+            CreateNewReward();
+        }
+    }
+
+    private void CreateNewReward()
+    {
         GameObject spawnedItem = Instantiate(rewardItemPrefab, transform.parent);
         CollectedItem itemScript = spawnedItem.GetComponent<CollectedItem>();
 
-        if (itemScript != null)
-        {
-            itemScript.iconImage.sprite = _lastEarnedSprite;
-            itemScript.iconImage.preserveAspect = true;
-            itemScript.amountText.text = rewardAmountText.text;
-        }
+        itemScript.iconImage.sprite = _lastEarnedSprite;
+        itemScript.iconImage.preserveAspect = true;
+        itemScript.amountText.text = _lastAmount;
 
-        RectTransform itemRect = spawnedItem.GetComponent<RectTransform>();
+        _activeRewards.Add(_lastEarnedSprite.name, itemScript);
+
+        AnimateItem(itemScript.GetComponent<RectTransform>(), true);
+    }
+
+    private void UpdateExistingReward(CollectedItem existingItem)
+    {
+        int currentAmount = ParseAmount(existingItem.amountText.text);
+        int addedAmount = ParseAmount(_lastAmount);
+        string newTotal = "x" + (currentAmount + addedAmount);
+
+        GameObject dummy = Instantiate(rewardItemPrefab, transform.parent);
+        dummy.GetComponent<CollectedItem>().iconImage.sprite = _lastEarnedSprite;
+        dummy.GetComponent<CollectedItem>().amountText.text = "";
+
+        existingItem.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 1);
+
+        AnimateItem(dummy.GetComponent<RectTransform>(), false, existingItem.transform, newTotal, existingItem);
+    }
+
+    private void AnimateItem(RectTransform itemRect, bool isNew, Transform targetPos = null, string amountToSet = "", CollectedItem itemToUpdate = null)
+    {
         itemRect.position = rewardIcon.transform.position;
+        Vector3 targetWorldPos = isNew ? leftPanelContent.position : targetPos.position;
 
-        popupPanel.SetActive(false);
+        Sequence s = DOTween.Sequence();
+        s.Append(itemRect.DOMove(targetWorldPos, 0.8f).SetEase(Ease.InQuart));
+        s.Join(itemRect.DOScale(isNew ? Vector3.one : Vector3.zero, 0.8f).SetEase(Ease.InQuart));
 
-        Sequence collectSequence = DOTween.Sequence();
-
-        collectSequence.Append(itemRect.DOMove(leftPanelContent.position, 0.8f).SetEase(Ease.InQuart));
-        collectSequence.Join(itemRect.DOScale(Vector3.zero, 0.8f).SetEase(Ease.InQuart)); // Giderken küçülmesini sağlar
-
-        collectSequence.OnComplete(() =>
+        s.OnComplete(() =>
         {
-            spawnedItem.transform.SetParent(leftPanelContent, false);
-
-            spawnedItem.transform.localScale = Vector3.one;
-            spawnedItem.transform.localRotation = Quaternion.identity;
-
-            Canvas.ForceUpdateCanvases();
-            LayoutRebuilder.ForceRebuildLayoutImmediate(leftPanelContent.GetComponent<RectTransform>());
+            if (isNew)
+            {
+                itemRect.SetParent(leftPanelContent, false);
+                itemRect.localScale = Vector3.one;
+                itemRect.localRotation = Quaternion.identity;
+                LayoutRebuilder.ForceRebuildLayoutImmediate(leftPanelContent.GetComponent<RectTransform>());
+            }
+            else
+            {
+                if (itemToUpdate != null) itemToUpdate.amountText.text = amountToSet;
+                Destroy(itemRect.gameObject);
+            }
         });
+    }
+
+    private int ParseAmount(string text)
+    {
+        string clean = text.Replace("x", "").Trim();
+        int.TryParse(clean, out int result);
+        return result;
     }
 }

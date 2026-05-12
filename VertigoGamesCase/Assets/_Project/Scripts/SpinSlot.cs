@@ -12,6 +12,7 @@ public class SpinSlot : MonoBehaviour
     {
         _currentData = data;
         ui_image_reward_icon.sprite = data.rewardIcon;
+        ui_image_reward_icon.preserveAspect = true;
 
         if (data.isDeath) ui_text_reward_amount_value.text = "";
         else ui_text_reward_amount_value.text = "x" + (data.baseAmount * multiplier).ToString();

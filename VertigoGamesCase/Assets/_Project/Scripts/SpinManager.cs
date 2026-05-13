@@ -31,6 +31,20 @@ public class SpinManager : MonoBehaviour
 
     public RewardPopupManager rewardPopupManager;
 
+    private void OnValidate()
+    {
+        rewardPool.Clear();
+
+        string path = "ScriptableObjects";
+        RewardData[] assets = Resources.LoadAll<RewardData>(path);
+
+        if (assets != null && assets.Length > 0)
+        {
+            rewardPool = assets.Where(x => x.isDeath == false).ToList();
+            deathData = assets.FirstOrDefault(x => x.isDeath == true);
+        }
+    }
+
     private void Start()
     {
         if (zoneStripManager != null)
@@ -80,23 +94,50 @@ public class SpinManager : MonoBehaviour
         SpinType currentRarity;
         int multiplier = 1;
 
-        if (currentZone % 30 == 0) { currentRarity = SpinType.Gold; multiplier = 10; ui_image_spin_main.sprite = goldSpinSprite; ui_image_indicator.sprite = goldIndicatorSprite; }
-        else if (currentZone % 5 == 0) { currentRarity = SpinType.Silver; multiplier = 5; ui_image_spin_main.sprite = silverSpinSprite; ui_image_indicator.sprite = silverIndicatorSprite; }
-        else { currentRarity = SpinType.Bronze; multiplier = 1; ui_image_spin_main.sprite = bronzeSpinSprite; ui_image_indicator.sprite = bronzeIndicatorSprite; }
-
-        List<RewardData> availablePool = rewardPool.Where(x => (x.rarity == currentRarity || x.rarity == SpinType.All) && !x.isDeath).ToList();
-        int countToTake = Mathf.Min(availablePool.Count, 8);
-        List<RewardData> selectedRewards = availablePool.OrderBy(x => Random.value).Take(countToTake).ToList();
-
-        if (currentRarity == SpinType.Bronze)
+        if (currentZone % 30 == 0)
         {
-            int deathIndex = Random.Range(0, Mathf.Min(selectedRewards.Count, 8));
+            currentRarity = SpinType.Gold;
+            multiplier = 20;
+            ui_image_spin_main.sprite = goldSpinSprite;
+            ui_image_indicator.sprite = goldIndicatorSprite;
+        }
+        else if (currentZone % 5 == 0)
+        {
+            currentRarity = SpinType.Silver;
+            multiplier = 10;
+            ui_image_spin_main.sprite = silverSpinSprite;
+            ui_image_indicator.sprite = silverIndicatorSprite;
+        }
+        else
+        {
+            currentRarity = SpinType.Bronze;
+            multiplier = 1;
+            ui_image_spin_main.sprite = bronzeSpinSprite;
+            ui_image_indicator.sprite = bronzeIndicatorSprite;
+        }
+
+
+        List<RewardData> availablePool = rewardPool
+            .Where(x => (x.rarity == currentRarity || x.rarity == SpinType.All))
+            .OrderBy(x => Random.value)
+            .ToList();
+
+        int slotCount = ui_spin_slots.Count;
+        List<RewardData> selectedRewards = availablePool.Take(slotCount).ToList();
+
+        if (currentRarity == SpinType.Bronze && deathData != null)
+        {
+            int deathIndex = Random.Range(0, selectedRewards.Count);
             selectedRewards[deathIndex] = deathData;
         }
 
         for (int i = 0; i < ui_spin_slots.Count; i++)
         {
-            if (i < selectedRewards.Count) ui_spin_slots[i].SetSlot(selectedRewards[i], multiplier);
+            if (i < selectedRewards.Count)
+            {
+                int finalMultiplier = selectedRewards[i].isDeath ? 1 : multiplier;
+                ui_spin_slots[i].SetSlot(selectedRewards[i], finalMultiplier);
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using DG.Tweening;
 using TMPro;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class RewardPopupManager : MonoBehaviour
 {
@@ -30,6 +31,7 @@ public class RewardPopupManager : MonoBehaviour
     [Header("Left Panel Settings")]
     public Transform leftPanelContent;
     public GameObject rewardItemPrefab;
+    public Button ExitButton;
 
     private Sprite _lastEarnedSprite;
     private string _lastAmount;
@@ -40,6 +42,7 @@ public class RewardPopupManager : MonoBehaviour
         popupPanel.SetActive(false);
         failPanel.SetActive(false);
         claimButton.onClick.AddListener(OnClaimButtonClicked);
+        ExitButton.onClick.AddListener(OnExitClicked);
 
         if (giveUpButton) giveUpButton.onClick.AddListener(OnGiveUpClicked);
         if (reviveWithCoinButton) reviveWithCoinButton.onClick.AddListener(OnReviveWithCoin);
@@ -103,7 +106,21 @@ public class RewardPopupManager : MonoBehaviour
             if (item != null) Destroy(item.gameObject);
         }
         _activeRewards.Clear();
+
         failPanel.SetActive(false);
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    private void OnExitClicked()
+    {
+        foreach (var item in _activeRewards.Values)
+        {
+            if (item != null) Destroy(item.gameObject);
+        }
+        _activeRewards.Clear();
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     private void OnReviveWithCoin()

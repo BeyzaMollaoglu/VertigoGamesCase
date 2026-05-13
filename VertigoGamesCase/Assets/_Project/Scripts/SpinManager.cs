@@ -53,15 +53,20 @@ public class SpinManager : MonoBehaviour
             .OnComplete(() =>
             {
                 isSpinning = false;
-
                 SpinSlot winningSlot = ui_spin_slots[randomSlotIndex];
                 RewardData wonData = winningSlot.GetCurrentData();
 
                 if (rewardPopupManager != null && wonData != null)
                 {
-                    int multiplier = (currentZone % 30 == 0) ? 10 : (currentZone % 5 == 0 ? 5 : 1);
-
-                    rewardPopupManager.ShowReward(wonData.rewardIcon, wonData.isDeath ? "DEATH" : "x" + (wonData.baseAmount * multiplier));
+                    if (wonData.isDeath)
+                    {
+                        rewardPopupManager.ShowFailScreen();
+                    }
+                    else
+                    {
+                        int multiplier = (currentZone % 30 == 0) ? 10 : (currentZone % 5 == 0 ? 5 : 1);
+                        rewardPopupManager.ShowReward(wonData.rewardIcon, "x" + (wonData.baseAmount * multiplier));
+                    }
                 }
 
                 currentZone++;

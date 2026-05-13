@@ -13,6 +13,13 @@ public class RewardPopupManager : MonoBehaviour
     public TextMeshProUGUI rewardAmountText;
     public Button claimButton;
 
+    [Header("Fail (Ölüm) Paneli")]
+    public GameObject failPanel;
+    public RectTransform failContainer;
+    public Button giveUpButton;
+    public Button reviveWithCoinButton;
+    public Button reviveWithAdButton;
+
     [Header("VFX Objeleri")]
     public RectTransform starFlash;
     public RectTransform starGlow;
@@ -31,11 +38,18 @@ public class RewardPopupManager : MonoBehaviour
     private void Start()
     {
         popupPanel.SetActive(false);
+        failPanel.SetActive(false);
         claimButton.onClick.AddListener(OnClaimButtonClicked);
+
+        if (giveUpButton) giveUpButton.onClick.AddListener(OnGiveUpClicked);
+        if (reviveWithCoinButton) reviveWithCoinButton.onClick.AddListener(OnReviveWithCoin);
+        if (reviveWithAdButton) reviveWithAdButton.onClick.AddListener(OnReviveWithAd);
     }
 
     public void ShowReward(Sprite icon, string amount)
     {
+        if (failPanel.activeSelf) return;
+
         _lastEarnedSprite = icon;
         _lastAmount = amount;
 
@@ -51,6 +65,19 @@ public class RewardPopupManager : MonoBehaviour
         mainContainer.DOScale(1f, animationDuration).SetEase(Ease.OutBack).SetUpdate(true);
 
         starFlash.DORotate(new Vector3(0, 0, 360), 5f, RotateMode.FastBeyond360).SetLoops(-1, LoopType.Incremental).SetEase(Ease.Linear);
+    }
+
+    public void ShowFailScreen()
+    {
+        _lastEarnedSprite = null;
+        _lastAmount = "";
+
+        popupPanel.SetActive(false);
+        failPanel.SetActive(true);
+
+        failContainer.localScale = Vector3.zero;
+        failContainer.DOKill();
+        failContainer.DOScale(1f, animationDuration).SetEase(Ease.OutBack).SetUpdate(true);
     }
 
     public void OnClaimButtonClicked()
@@ -69,8 +96,30 @@ public class RewardPopupManager : MonoBehaviour
         }
     }
 
+    private void OnGiveUpClicked()
+    {
+        foreach (var item in _activeRewards.Values)
+        {
+            if (item != null) Destroy(item.gameObject);
+        }
+        _activeRewards.Clear();
+        failPanel.SetActive(false);
+    }
+
+    private void OnReviveWithCoin()
+    {
+        failPanel.SetActive(false);
+    }
+
+    private void OnReviveWithAd()
+    {
+        failPanel.SetActive(false);
+    }
+
     private void CreateNewReward()
     {
+        if (_lastEarnedSprite == null) return;
+
         GameObject spawnedItem = Instantiate(rewardItemPrefab, transform.parent);
         CollectedItem itemScript = spawnedItem.GetComponent<CollectedItem>();
 
@@ -85,6 +134,8 @@ public class RewardPopupManager : MonoBehaviour
 
     private void UpdateExistingReward(CollectedItem existingItem)
     {
+        if (_lastEarnedSprite == null) return;
+
         int currentAmount = ParseAmount(existingItem.amountText.text);
         int addedAmount = ParseAmount(_lastAmount);
         string newTotal = "x" + (currentAmount + addedAmount);

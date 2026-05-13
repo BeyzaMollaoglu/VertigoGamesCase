@@ -28,6 +28,11 @@ public class RewardPopupManager : MonoBehaviour
     [Header("Ayarlar")]
     public float animationDuration = 0.5f;
 
+    [Header("Exit Confirmation Panel")]
+    public GameObject exitConfirmPanel;
+    public Button confirmExitButton;
+    public Button cancelExitButton;
+
     [Header("Left Panel Settings")]
     public Transform leftPanelContent;
     public GameObject rewardItemPrefab;
@@ -47,6 +52,18 @@ public class RewardPopupManager : MonoBehaviour
         if (giveUpButton) giveUpButton.onClick.AddListener(OnGiveUpClicked);
         if (reviveWithCoinButton) reviveWithCoinButton.onClick.AddListener(OnReviveWithCoin);
         if (reviveWithAdButton) reviveWithAdButton.onClick.AddListener(OnReviveWithAd);
+
+        if (ExitButton != null)
+            ExitButton.onClick.AddListener(OnExitClicked);
+
+        if (confirmExitButton != null)
+            confirmExitButton.onClick.AddListener(ConfirmWalkAway);
+
+        if (cancelExitButton != null)
+            cancelExitButton.onClick.AddListener(() => exitConfirmPanel.SetActive(false));
+
+        if (exitConfirmPanel != null)
+            exitConfirmPanel.SetActive(false);
     }
 
     public void ShowReward(Sprite icon, string amount)
@@ -114,12 +131,12 @@ public class RewardPopupManager : MonoBehaviour
 
     private void OnExitClicked()
     {
-        foreach (var item in _activeRewards.Values)
-        {
-            if (item != null) Destroy(item.gameObject);
-        }
-        _activeRewards.Clear();
+        if (exitConfirmPanel != null) exitConfirmPanel.SetActive(true);
+    }
 
+    private void ConfirmWalkAway()
+    {
+        _activeRewards.Clear();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 

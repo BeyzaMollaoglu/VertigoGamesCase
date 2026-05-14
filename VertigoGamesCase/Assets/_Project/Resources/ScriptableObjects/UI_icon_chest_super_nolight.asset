@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rewardName: UI_icon_chest_super_nolight
   rewardIcon: {fileID: 21300000, guid: 24e65b58807f3f74cbe98f1eeb78b220, type: 3}
-  baseAmount: 10
+  baseAmount: 1
   isDeath: 0
-  rarity: 3
+  isChest: 1
+  rarity: 2

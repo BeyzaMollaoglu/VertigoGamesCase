@@ -118,6 +118,7 @@ public class RewardPopupManager : MonoBehaviour
 
     private void OnGiveUpClicked()
     {
+        DOTween.KillAll();
         foreach (var item in _activeRewards.Values)
         {
             if (item != null) Destroy(item.gameObject);
@@ -136,6 +137,7 @@ public class RewardPopupManager : MonoBehaviour
 
     private void ConfirmWalkAway()
     {
+        DOTween.KillAll();
         _activeRewards.Clear();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }

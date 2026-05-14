@@ -57,6 +57,7 @@ public class SpinManager : MonoBehaviour
     public void ExecuteSpin()
     {
         if (isSpinning) return;
+        ui_image_spin_main.transform.DOKill();
         isSpinning = true;
 
         int randomSlotIndex = Random.Range(0, 8);
@@ -97,14 +98,14 @@ public class SpinManager : MonoBehaviour
         if (currentZone % 30 == 0)
         {
             currentRarity = SpinType.Gold;
-            multiplier = 20;
+            multiplier = 10;
             ui_image_spin_main.sprite = goldSpinSprite;
             ui_image_indicator.sprite = goldIndicatorSprite;
         }
         else if (currentZone % 5 == 0)
         {
             currentRarity = SpinType.Silver;
-            multiplier = 10;
+            multiplier = 5;
             ui_image_spin_main.sprite = silverSpinSprite;
             ui_image_indicator.sprite = silverIndicatorSprite;
         }
@@ -115,7 +116,6 @@ public class SpinManager : MonoBehaviour
             ui_image_spin_main.sprite = bronzeSpinSprite;
             ui_image_indicator.sprite = bronzeIndicatorSprite;
         }
-
 
         List<RewardData> availablePool = rewardPool
             .Where(x => (x.rarity == currentRarity || x.rarity == SpinType.All))
@@ -133,6 +133,7 @@ public class SpinManager : MonoBehaviour
 
         for (int i = 0; i < ui_spin_slots.Count; i++)
         {
+            ui_spin_slots[i].transform.DOKill();
             if (i < selectedRewards.Count)
             {
                 int finalMultiplier = selectedRewards[i].isDeath ? 1 : multiplier;

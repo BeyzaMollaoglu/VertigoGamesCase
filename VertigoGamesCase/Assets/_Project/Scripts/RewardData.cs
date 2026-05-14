@@ -9,5 +9,6 @@ public class RewardData : ScriptableObject
     public Sprite rewardIcon;
     public int baseAmount;
     public bool isDeath;
+    public bool isChest;
     public SpinType rarity;
 }
